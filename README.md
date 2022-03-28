@@ -37,3 +37,5 @@ release : 빌드 버전을 준비하는 브랜치
 <br/>
 
 ## 🤝 Code Convention Rule
+
+PyLint
