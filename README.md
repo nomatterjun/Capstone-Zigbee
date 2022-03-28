@@ -1,1 +1,1 @@
-# Capstone-Zigbee
+# 2022 캡스톤 프로젝트 - 팀 Zigbee
