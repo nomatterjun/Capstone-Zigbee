@@ -17,7 +17,7 @@
 ### git
 🔀 **git branch**
 ```
-master : 정식 빌드 브랜치
+master  : 정식 빌드 브랜치
 develop : 정식 빌드될 버전을 개발하는 브랜치
 feature : 기능을 개발하는 브랜치
 release : 빌드 버전을 준비하는 브랜치
@@ -26,10 +26,10 @@ release : 빌드 버전을 준비하는 브랜치
 
 ✌️  **git commit message**
 ```
-[Feat] : 기능추가
-[Fix] : 버그수정
+[Feat]  : 기능추가
+[Fix]   : 버그수정
 [Chore] : 간단한 수정
-[Docs] : 문서 및 리드미 작성
+[Docs]  : 문서 및 리드미 작성
 [Merge] : 머지
 ```
 
