@@ -4,6 +4,7 @@
 
 ## ⚙️ 개발환경 및 라이브러리
 [![python](https://img.shields.io/badge/python-3.10-blue.svg)]()
+[![tensorflow](https://img.shields.io/badge/python-3.10-blue.svg)]()
 
 <br/>
 <br/>
@@ -11,6 +12,7 @@
 ## 📕 Team Zigbee Rule
 ### Team Rule
 **주간 회의**
+- 매주 금요일 9시에 진행한다.
 
 <br/>
 
