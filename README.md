@@ -4,7 +4,7 @@
 
 ## ⚙️ 개발환경 및 라이브러리
 [![python](https://img.shields.io/badge/python-3.10-blue.svg)]()
-[![tensorflow](https://img.shields.io/badge/python-3.10-blue.svg)]()
+[![tensorflow](https://img.shields.io/badge/TensorFlow-2.8.0-orange.svg)]()
 
 <br/>
 <br/>
