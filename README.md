@@ -19,7 +19,7 @@
 ### git
 🔀 **git branch**
 ```
-master  : 정식 빌드 브랜치
+main    : 정식 빌드 브랜치
 develop : 정식 빌드될 버전을 개발하는 브랜치
 feature : 기능을 개발하는 브랜치
 release : 빌드 버전을 준비하는 브랜치
