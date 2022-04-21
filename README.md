@@ -1,3 +1,14 @@
+# Team Zigbee
+
+> 상황 중심의 스마트 홈 플랫폼
+
+## ⚙️ 개발환경 및 라이브러리
+[![python](https://img.shields.io/badge/python-3.10-blue.svg)]()
+[![tensorflow](https://img.shields.io/badge/TensorFlow-2.8.0-orange.svg)]()
+
+<br/>
+<br/>
+
 # 그라운드룰
 
 # 주간 회의
@@ -19,7 +30,7 @@
 - 약 한 달 간격으로 멘토님을 포함한 회의를 진행한다.
 - 온라인 Zoom 회의나 오프라인으로 이루어진다.
 
-
+<br/>
 
 # git
 
@@ -43,6 +54,8 @@ release : 빌드 버전을 준비하는 브랜치
 [Docs]  : 문서 및 리드미 작성
 [Merge] : 머지
 ```
+
+<br/>
 
 # 코드 룰
 
