@@ -3,7 +3,7 @@
 > 상황 중심의 스마트 홈 플랫폼
 
 ## ⚙️ 개발환경 및 라이브러리
-[![python](https://img.shields.io/badge/python-3.10-blue.svg)]()
+[![python](https://img.shields.io/badge/python-3.9-blue.svg)]()
 
 <br/>
 <br/>
