@@ -1,0 +1,10 @@
+
+# LightMe Core
+aiohttp==3.8.1
+astral==2.2
+pip>=21.0,<=22.2.2
+awesomeversion>=22.8
+voluptuous==0.13.1
+
+# Dev
+termcolor==1.1.0 
