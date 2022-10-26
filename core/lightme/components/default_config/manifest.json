@@ -1,8 +1,0 @@
-{
-    "domain": "default_config",
-    "name": "Default Config",
-    "dependencies": [
-      "network"
-    ]
-  }
-  
