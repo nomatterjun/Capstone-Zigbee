@@ -1,21 +1,24 @@
 {
+  "title": "Light Me",
   "config": {
     "step": {
       "user": {
+        "title": "Set up Light Me",
+        "description": "Do you want to set up Light Me?",
         "data": {
-          "host": "[%key:common::config_flow::data::host%]",
-          "username": "[%key:common::config_flow::data::username%]",
-          "password": "[%key:common::config_flow::data::password%]"
+          "host": "Host : IP address of your device."
         }
       }
-    },
-    "error": {
-      "cannot_connect": "[%key:common::config_flow::error::cannot_connect%]",
-      "invalid_auth": "[%key:common::config_flow::error::invalid_auth%]",
-      "unknown": "[%key:common::config_flow::error::unknown%]"
-    },
-    "abort": {
-      "already_configured": "[%key:common::config_flow::abort::already_configured_device%]"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Set up Light Me",
+        "data": {
+          "host": "Host : IP address of your device."
+        }
+      }
     }
   }
 }

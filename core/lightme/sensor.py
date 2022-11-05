@@ -1,36 +1,36 @@
-"""Light Me moment sensor."""
+"""LightMe moment sensor."""
+from __future__ import annotations
 
-import logging
-
-from homeassistant.components.sensor import SensorEntity
-from homeassistant.const import Platform
-from homeassistant.helpers.update_coordinator import CoordinatorEntity
-from homeassistant.helpers import config_validation as cv
-
-from .const import (
-    DOMAIN
+from homeassistant.components.sensor import SensorEntity, SensorDeviceClass, SensorStateClass
+from homeassistant.core import HomeAssistant
+from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
+from homeassistant.const import (
+    TEMP_CELSIUS
 )
 
-_LOGGER = logging.getLogger(__name__)
+from .const import DOMAIN
 
-class MomentSensor(CoordinatorEntity, SensorEntity):
+def setup_platform(
+    hass: HomeAssistant,
+    config: ConfigType,
+    add_entities: AddEntitiesCallback,
+    discovery_info: DiscoveryInfoType | None = None
+) -> None:
+    """Set up the sensor platform."""
+    add_entities([MomentSensor()])
 
-    def __init__(self, coordinator, id):
-        super().__init__(coordinator)
-
-        self.id = id
-        self.name: str | None = None
+class MomentSensor(SensorEntity):
+    """Representation of a moment sensor."""
     
-    @property
-    def unique_id(self) -> str:
-        """Return unique entity ID."""
-        entity_id = cv.entity_id('{}.{}_{}'.format(Platform.SENSOR, DOMAIN, self.id))
-        return entity_id
+    _attr_name: str | None = "Example Moment Sensor"
+    _attr_native_unit_of_measurement: str | None = TEMP_CELSIUS
+    _attr_device_class: SensorDeviceClass | str | None = SensorDeviceClass.TEMPERATURE
+    _attr_state_class: SensorStateClass | str | None = SensorStateClass.MEASUREMENT
 
-    @property
-    def name(self) -> str:
-        """Return name of moment sensor."""
-        if self.name is None:
-            self.name = 'Moment Sensor'
-        else:
-            return self.name
+    def update(self) -> None:
+        """Fetch new state data for the sensor.
+
+        This is the only method that should fetch new data for Home Assistant.
+        """
+        self._attr_native_value = self.hass.data[DOMAIN]['temperature']
