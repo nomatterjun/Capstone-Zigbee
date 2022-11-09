@@ -8,9 +8,8 @@ from homeassistant.config_entries import ConfigEntry
 from .const import DOMAIN, PLATFORMS
 
 async def async_setup(hass, config):
-    hass.data.setdefault(DOMAIN, {
-        'temperature': 23
-    })
+    # TODO Get currently registered scenes.
+
     # Return boolean to indicate that initialization was successful.
     return True
 
