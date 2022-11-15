@@ -1,6 +1,7 @@
 """LightMe moment sensor."""
 from __future__ import annotations
 
+import logging
 import voluptuous as vol
 from typing import Any
 
@@ -12,43 +13,33 @@ from homeassistant.components.sensor import (
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
-from homeassistant.const import (
-    CONF_HOST,
-    CONF_PORT,
-    TEMP_CELSIUS
-)
 
-from .const import DOMAIN
-from .network import Coordinator
+from .const import DOMAIN, CONF_API, MOMENT_INFO
+from .network import LightMeAPI as API
 
-PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
-    vol.Required(CONF_HOST): cv.string,
-    vol.Required(CONF_PORT): cv.string
-})
+_LOGGER = logging.getLogger(__name__)
 
-def setup_platform(
-    hass: HomeAssistant,
-    config: ConfigType,
-    add_entities: AddEntitiesCallback,
-    discovery_info: DiscoveryInfoType | None = None
-) -> None:
-    """Set up the sensor platform."""
-    host = config[CONF_HOST]
-    port = config[CONF_PORT]
+async def async_setup_entry(hass, config_entry, async_add_entities):
+    """Set up sensor for LightMe."""
 
-    coordinator = Coordinator(host, port)
-    coordinator.update()
+    api = hass.data[DOMAIN][CONF_API][config_entry.entry_id]
 
-    _sensors += [MomentSensor(coordinator)]
-    add_entities(_sensors, True)
+    def async_add_entity():
+        """Add sensor from sensor."""
+        entities = []
+        for device in MOMENT_INFO.values():
+            entities.append(MomentSensor(device, api))
+        if entities:
+            async_add_entities(entities)
+    async_add_entity()
 
 class MomentSensor(SensorEntity):
     """Representation of a moment sensor."""
 
-    def __init__(self, api: Coordinator) -> None:
+    def __init__(self, device, api: API) -> None:
         """Initialize the moment sensor."""
-        self._attr_state_class = SensorStateClass.MEASUREMENT
-        self._api = api
+        self.device = device
+        self.api = api
 
     @property
     def name(self) -> str | None:
@@ -64,18 +55,5 @@ class MomentSensor(SensorEntity):
 
     @property
     def state(self) -> Any:
-        return self._api.result
-
-    def update(self) -> None:
-        """Fetch new state data for the sensor.
-
-        This is the only method that should fetch new data for Home Assistant.
-        """
-        if self._api is None:
-            return
-
-        self._api.update()
-
-        # TODO get data from moment sensor and update entity's state.
-
-        self._attr_native_value = self.hass.data[DOMAIN]['temperature']
+        # value = self._api.result.get()
+        return "sdf"

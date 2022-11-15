@@ -1,8 +1,8 @@
 {
   "domain": "lightme",
   "name": "Light Me",
-  "config_flow": false,
-  "requirements": ["fastapi>=0.86.0"],
+  "config_flow": true,
+  "requirements": [],
   "dependencies": [],
   "codeowners": [
     "@StanSign"
