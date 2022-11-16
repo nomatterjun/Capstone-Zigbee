@@ -97,15 +97,14 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server_socket:
         #setup mp
         with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as pose:          
         
-            #사진 삭제
-            os.remove("temp.png")
             #사진 촬영
             temp_ret, temp_frame = temp.read()
             #사진 저장
-            cv.imwrite("temp.png")
+            cv.imwrite("temp.png", temp_frame)
+            time.sleep(0.5)
             #저장된 이미지
             img = cv.imread("temp.png") 
-            ret, frame = img.read("temp.png")
+            ret, frame = temp.read()
                 
             #recolor image to RGB
             image = cv.cvtColor(frame, cv.COLOR_BGR2RGB)
@@ -166,6 +165,8 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server_socket:
             except:
                 pass
                 
+            #사진 삭제
+            os.remove("temp.png")   
                 
 
 
@@ -204,7 +205,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server_socket:
         time.sleep(1)
         '''
         
-        time.sleep(1)
+        time.sleep(0.5)
         
     #client_socket.close()  # 클라이언트 소켓 종료
         
