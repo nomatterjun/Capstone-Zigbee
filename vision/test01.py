@@ -73,8 +73,6 @@ for i in range(len(boxes)):
         cv2.rectangle(img, (x, y), (x + w, y + h), color, 2)
         cv2.putText(img, label, (x, y+30), font, 2, color, 2)
         
-print({class_in})
-
 cv2.imshow("Image", img)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
