@@ -75,7 +75,8 @@ while temp.isOpened():
         time.sleep(0.5)
         #저장된 이미지
         img = cv2.imread("temp.png") 
-        ret, frame = temp.read()
+        ret = cv2.imread("temp.png")
+        frame = cv2.imread("temp.png")
             
         #recolor image to RGB
         image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
