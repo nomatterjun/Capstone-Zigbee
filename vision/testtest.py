@@ -159,7 +159,7 @@ while temp.isOpened():
             pass
         
         #img load
-        img = cv2.imread("sample.jpg")
+        img = cv2.imread("temp.png")
         #img = cv2.resize(img, None, fx=0.4, fy=0.4)
         height, width, channels = img.shape
 
@@ -203,7 +203,7 @@ while temp.isOpened():
                 color = colors[i]
                 cv2.rectangle(img, (x, y), (x + w, y + h), color, 2)
                 cv2.putText(img, label, (x, y+30), font, 2, color, 2)
-                
+
         #사진 삭제
         os.remove("temp.png")
             
