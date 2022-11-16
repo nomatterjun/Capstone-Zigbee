@@ -6,14 +6,10 @@ import voluptuous as vol
 from typing import Any
 
 import homeassistant.helpers.config_validation as cv
-from homeassistant.components.sensor import (
-    SensorEntity, SensorDeviceClass, SensorStateClass,
-    PLATFORM_SCHEMA
-)
+from homeassistant.components.sensor import SensorEntity
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
 
+from .lightme_device import LightMeDevice
 from .const import DOMAIN, CONF_API, MOMENT_INFO
 from .network import LightMeAPI as API
 
@@ -31,19 +27,28 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
             entities.append(MomentSensor(device, api))
         if entities:
             async_add_entities(entities)
+
     async_add_entity()
 
-class MomentSensor(SensorEntity):
+class MomentSensor(LightMeDevice, SensorEntity):
     """Representation of a moment sensor."""
 
-    def __init__(self, device, api: API) -> None:
-        """Initialize the moment sensor."""
-        self.device = device
-        self.api = api
+    @property
+    def state(self) -> Any:
+        """Return state of moment sensor."""
+
+        # TODO Socket
+        value = self.api.result.get("time")
+        return f"{value}"
 
     @property
     def name(self) -> str | None:
-        return "Example Moment Sensor"
+        """Return name of moment sensor."""
+        if not self.api.get_data(self.unique_id):
+            self.api.set_data(self.unique_id, True)
+            return DOMAIN + " " + self.device[0]
+        else:
+            return self.device[1]
 
     @property
     def unique_id(self) -> str | None:
@@ -52,8 +57,3 @@ class MomentSensor(SensorEntity):
     @property
     def icon(self) -> str | None:
         return 'mdi:home-analytics'
-
-    @property
-    def state(self) -> Any:
-        # value = self._api.result.get()
-        return "sdf"

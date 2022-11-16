@@ -4,6 +4,9 @@ import homeassistant.helpers.config_validation as cv
 from homeassistant.const import Platform
 
 DOMAIN = "lightme"
+MODEL = "Light Me Moment Sensor"
+BRAND = "TeamZigbee"
+VERSION = "0.1.0"
 PLATFORMS: list[Platform] = [Platform.SENSOR]
 
 CONF_API = "api"
