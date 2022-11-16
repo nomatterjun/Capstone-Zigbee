@@ -5,6 +5,7 @@ import logging
 
 from homeassistant.core import callback
 from homeassistant.helpers.entity import Entity
+from homeassistant.helpers.entity import DeviceInfo
 
 from .const import DOMAIN
 from .network import LightMeAPI as API
@@ -30,23 +31,16 @@ class LightMeBase:
         return self.host + ":" + self.device[0]
 
     @property
-    def device_info(self):
+    def device_info(self) -> DeviceInfo:
         """Return device registry information for this entity."""
-        return {
-            "connections": {(self.host, self.unique_id)},
-            "identifiers": {
-                (
-                    DOMAIN,
-                    self.host,
-                )
-            },
-            "manufacturer": f"{self.api.brand_name}",
-            "model": f"{self.api.model} v{self.api.version}",
-            "name": f"{self.api.brand_name} {self.host}",
-            "sw_version": self.api.version,
-            "via_device": (DOMAIN, self.host),
-            "DeviceEntryType": "service",
-        }
+        return DeviceInfo(
+            identifiers={(DOMAIN, self.host)},
+            manufacturer=f"{self.api.brand_name}",
+            model=f"{self.api.model}",
+            name=f"{self.api.brand_name} {self.host}",
+            sw_version=self.api.version,
+            via_device=(DOMAIN, self.host)
+        )
 
 class LightMeDevice(LightMeBase, Entity):
     """Defines a device entity."""
@@ -67,8 +61,7 @@ class LightMeDevice(LightMeBase, Entity):
     async def async_added_to_hass(self):
         """Subscribe to device events."""
         self.register(self.unique_id, self.async_update_callback)
-        if self.device[0] == "Light Me":
-            await self.api.update()
+        await self.api.update()
         self.async_write_ha_state()
 
     async def async_will_remove_from_hass(self) -> None:
@@ -93,7 +86,7 @@ class LightMeDevice(LightMeBase, Entity):
         return False
 
     @property
-    def extra_state_attributes (self):
+    def extra_state_attributes(self):
         """Return the state attributes of the sensor."""
         attr = {}
         return attr

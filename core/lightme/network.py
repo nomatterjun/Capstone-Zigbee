@@ -14,7 +14,9 @@ from .const import (
     MODEL,
     BRAND,
     VERSION,
-    MOMENT_INFO
+    MOMENT_INFO,
+    CURRENT_MOMENT,
+    UPCOMING_MOMENT
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -42,10 +44,7 @@ class LightMeAPI:
     def host(self):
         """Return host."""
         data = self.entry.options.get(CONF_HOST, self.entry.data.get(CONF_HOST))
-        if data == "127.0.0.1":
-            return data
-        else:
-            return data + "(localhost)"
+        return data
 
     @property
     def port(self):
@@ -96,30 +95,33 @@ class LightMeAPI:
 
     async def update(self):
         """Update function for updating api info."""
-        self.result = {
-            "current_scene": "test"
-        }
-        for id in MOMENT_INFO.keys():
+        # TODO 반복해서 업데이트 ㄱ
+        self.websocket()
+        _LOGGER.info(f"[{BRAND}] Update moment sensor information: {self.result}")
+        for key in MOMENT_INFO.keys():
+            _LOGGER.warn(key)
             try:
-                self.device_update(id)
+                self.device_update(key)
             except Exception as exc:
                 _LOGGER.info(f"[{BRAND}] Updating failed: {exc}")
 
-# server_address = (self._host, int(self._port))
-#
-# with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:
-#     client_socket.settimeout(10)
-#     msg: str | bytes | None
-#     try:
-#         client_socket.connect(server_address)  # 서버에 접속
-#         client_socket.send("Requesting state of sensor.".encode())  # 서버에 메시지 전송
-#         msg = client_socket.recv(SIZE)  # 서버로부터 응답받은 메시지 반환
-#         print("resp from server : {}".format(msg))  # 서버로부터 응답받은 메시지 출력
-#     except socket.timeout as error:
-#         _LOGGER.error("Timeout while requesting socket connection, %s", error)
-#     finally:
-#         client_socket.close()
-    
-#     if msg is not None:
-#         dict_msg = json.loads(msg)
-#         self.result = dict_msg['result']
+    def websocket(self):
+        server_address = (self.host, self.port)
+        _LOGGER.warn(f"{server_address}")
+
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:
+            client_socket.settimeout(10)
+            msg: str | bytes | None
+            try:
+                client_socket.connect(server_address)  # 서버에 접속
+                client_socket.send("Requesting state of sensor.".encode())  # 서버에 메시지 전송
+                msg = client_socket.recv(SIZE)  # 서버로부터 응답받은 메시지 반환
+                print("resp from server : {}".format(msg))  # 서버로부터 응답받은 메시지 출력
+            except socket.timeout as error:
+                _LOGGER.error("Timeout while requesting socket connection, %s", error)
+            finally:
+                client_socket.close()
+            
+            if msg is not None:
+                dict_msg = json.loads(msg)
+                self.result = dict_msg

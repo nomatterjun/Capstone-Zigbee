@@ -2,16 +2,13 @@
 from __future__ import annotations
 
 import logging
-import voluptuous as vol
 from typing import Any
+from time import sleep
 
-import homeassistant.helpers.config_validation as cv
 from homeassistant.components.sensor import SensorEntity
-from homeassistant.core import HomeAssistant
 
 from .lightme_device import LightMeDevice
 from .const import DOMAIN, CONF_API, MOMENT_INFO
-from .network import LightMeAPI as API
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -38,12 +35,15 @@ class MomentSensor(LightMeDevice, SensorEntity):
         """Return state of moment sensor."""
 
         # TODO Socket
-        value = self.api.result.get("time")
-        return f"{value}"
+        self.api.update()
+        value = self.api.result.get(self.device[0])
+        _LOGGER.warn(f"Value of {self.device[0]}: {value}")
+        return value
 
     @property
     def name(self) -> str | None:
         """Return name of moment sensor."""
+        print(self.device)
         if not self.api.get_data(self.unique_id):
             self.api.set_data(self.unique_id, True)
             return DOMAIN + " " + self.device[0]
@@ -51,9 +51,7 @@ class MomentSensor(LightMeDevice, SensorEntity):
             return self.device[1]
 
     @property
-    def unique_id(self) -> str | None:
-        return 'sensor.moment_sensor'
-
-    @property
     def icon(self) -> str | None:
-        return 'mdi:home-analytics'
+        """Return the icon of the sensor."""
+        icon = MOMENT_INFO.get(self.device[0])[3]
+        return icon

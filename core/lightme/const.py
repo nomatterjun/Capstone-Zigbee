@@ -22,6 +22,12 @@ OPTIONS = [
     (CONF_PORT, DEFAULT_PORT, cv.port)
 ]
 
+# Informations
+# [Key, Alias, Unit of Measurement, Icon, Device Class]
+CURRENT_MOMENT = ["CurrentMoment", "현재 상황", "", "mdi:ray-vertex", ""]
+UPCOMING_MOMENT = ["UpcomingMoment", "예약 상황", "", "mdi:ray-start-arrow", ""]
+
 MOMENT_INFO = {
-    "current_scene": "test"
+    CURRENT_MOMENT[0]: CURRENT_MOMENT,
+    UPCOMING_MOMENT[0]: UPCOMING_MOMENT
 }
