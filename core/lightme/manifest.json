@@ -6,6 +6,6 @@
   "requirements": [],
   "dependencies": [],
   "codeowners": ["@stansign"],
-  "version": "0.0.1",
+  "version": "1.0.0",
   "iot_class": "local_polling"
 }

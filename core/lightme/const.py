@@ -5,7 +5,7 @@ from homeassistant.const import Platform
 DOMAIN = "lightme"
 BRAND = "Team Zigbee"
 MODEL = "Moment Sensor"
-SW_VERSION = "0.0.1"
+SW_VERSION = "1.0.0"
 
 PLATFORMS: list[Platform] = [Platform.SENSOR]
 
