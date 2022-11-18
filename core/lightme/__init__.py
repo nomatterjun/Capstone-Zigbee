@@ -15,8 +15,6 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
 from .const import (
     DOMAIN,
-    ATTR_CURRENT_MOMENT,
-    ATTR_PREVIOUS_MOMENT,
     CONF_HOST,
     CONF_PORT,
     PLATFORMS
@@ -64,15 +62,14 @@ async def get_coordinator(
     host = entry.data.get(CONF_HOST, "127.0.0.1")
     port = entry.data.get(CONF_PORT, 8080)
 
-    if hass.data[DOMAIN]:
-        return hass.data[DOMAIN]
+    if hass.data[DOMAIN].get(host):
+        return hass.data[DOMAIN][host]
 
     async def async_get_data():
         with async_timeout.timeout(TIMEOUT_INTERVAL):
             data: dict[str: Any] = []
             try:
                 server_address = (host, port)
-                _LOGGER.info(f"{server_address}")
 
                 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:
                     client_socket.settimeout(TIMEOUT_INTERVAL)
@@ -93,14 +90,22 @@ async def get_coordinator(
                 raise
             return data
 
-    hass.data[DOMAIN] = DataUpdateCoordinator(
+    # hass.data{
+    #   "lightme": {
+    #       "127.0.0.1": {
+    #           coordinator
+    # }
+    # }
+    # }
+    # coordinator data: 전체
+    hass.data[DOMAIN][host] = DataUpdateCoordinator(
         hass,
         _LOGGER,
         name=DOMAIN,
         update_method=async_get_data,
         update_interval=timedelta(seconds=UPDATE_INTERVAL)
     )
-    coordinator: DataUpdateCoordinator = hass.data[DOMAIN]
-    await coordinator.async_refresh()
+    _coordinator: DataUpdateCoordinator = hass.data[DOMAIN][host]
+    await _coordinator.async_refresh()
 
-    return hass.data[DOMAIN]
+    return hass.data[DOMAIN][host]

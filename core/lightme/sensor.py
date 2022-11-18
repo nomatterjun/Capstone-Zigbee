@@ -17,14 +17,13 @@ from .const import (
     BRAND,
     DOMAIN,
     MODEL,
-    SW_VERSION,
-    SENSOR_INFO
+    SW_VERSION
 )
 
 SENSOR_TYPES: tuple[SensorEntityDescription, ...] = (
     SensorEntityDescription(
         key="PreviousMoment",
-        icon="mdi:ray-vertex",
+        icon="mdi:ray-start",
         name="이전 상황"
     ),
     SensorEntityDescription(
@@ -43,27 +42,30 @@ async def async_setup_entry(
     coordinator = await get_coordinator(hass, config_entry)
 
     sensors = [
-        MomentSensor(coordinator, config_entry, description) for description in SENSOR_TYPES
+        MomentSensor(coordinator, config_entry, description)
+        for description in SENSOR_TYPES
     ]
 
     async_add_entities(sensors)
 
 class MomentSensor(CoordinatorEntity, SensorEntity) :
-    """Sensor platform class."""
+    """Sensor representing moment sensor data."""
 
     def __init__(
         self,
-        coordinator: DataUpdateCoordinator,
+        coordinator,
         config_entry: ConfigEntry,
         description: SensorEntityDescription
     ):
         """Initializer."""
-        super().__init__(coordinator)
+        super().__init__(coordinator) # coordinator defined here.
         self.description = description
         self.host = config_entry.data.get(CONF_HOST)
         self.port = config_entry.data.get(CONF_PORT)
 
+        self._attr_icon = self.description.icon
         self._attr_unique_id = f"{self.host}-{self.description.key}"
+        self._attr_name = self.description.name
 
     @property
     def device_info(self) -> DeviceInfo:
@@ -78,15 +80,6 @@ class MomentSensor(CoordinatorEntity, SensorEntity) :
         )
 
     @property
-    def icon(self) -> str | None:
-        """Return icon of sensor."""
-        return self.description.icon
-
-    @property
-    def name(self) -> str | None:
-        """Return name of sensor."""
-        return self.description.name
-
-    @property
     def state(self) -> StateType:
-        return "null"
+        """Return the state of the sensor."""
+        return self.coordinator.data[self.description.key]
