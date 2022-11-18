@@ -12,6 +12,38 @@ import numpy as np
 mp_drawing = mp.solutions.drawing_utils
 mp_pose = mp.solutions.pose
 
+classes = ["person", "bicycle", "car", "motorcycle",
+            "airplane", "bus", "train", "truck", "boat", "traffic light", "fire hydrant",
+            "stop sign", "parking meter", "bench", "bird", "cat", "dog", "horse",
+            "sheep", "cow", "elephant", "bear", "zebra", "giraffe", "backpack",
+            "umbrella", "handbag", "tie", "suitcase", "frisbee", "skis",
+            "snowboard", "sports ball", "kite", "baseball bat", "baseball glove", "skateboard",
+            "surfboard", "tennis racket", "bottle", "wine glass", "cup", "fork", "knife",
+            "spoon", "bowl", "banana", "apple", "sandwich", "orange", "broccoli", "carrot", "hot dog",
+            "pizza", "donut", "cake", "chair", "couch", "potted plant", "bed", "dining table",
+            "toilet", "tv", "laptop", "mouse", "remote", "keyboard",
+            "cell phone", "microwave", "oven", "toaster", "sink", "refrigerator",
+            "book", "clock", "vase", "scissors", "teddy bear", "hair drier", "toothbrush" ]
+
+
+len(classes)
+
+#상황별 필요 객체 목록
+meal_con = ["bottle", "wine glass", "cup", "fork", "knife",
+            "spoon", "bowl", "banana", "apple", "sandwich", "orange", "broccoli", "carrot", "hot dog",
+            "pizza", "donut", "cake"]
+media_con = ["remote","tv","cell phone","couch","bed"]
+work_con = ["book","keyboard", "laptop"]
+
+#결과 송출 부분
+meal_check = 0
+score_con = 0
+# Yolo load
+net = cv2.dnn.readNet("yolov3.weights", "yolov3.cfg")
+
+layer_names = net.getLayerNames()
+output_layers = [layer_names[i - 1] for i in net.getUnconnectedOutLayers()]
+colors = np.random.uniform(0, 255, size=(len(classes), 3))
 
 
 
@@ -64,7 +96,8 @@ stage = {
 }
 temp = cv2.VideoCapture(0) #카메라
 result = json.dumps(stage)
-
+stage['CurrentMoment'] = "Initial"
+motion = "initial"
 
 
 
@@ -160,17 +193,85 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server_socket:
                 
  
                 
+            # 동작1 sit
+            if motion == "stand":
+                        #img load
+                img = cv2.imread("temp.png")
+                #img = cv2.resize(img, None, fx=0.4, fy=0.4)
+                height, width, channels = img.shape
 
-            if stage["CurrentMoment"] == "sit":
-                
-                #영채 함수
-                
+                blob = cv2.dnn.blobFromImage(img, 0.00392, (416, 416), (0, 0, 0), True, crop=False)
+                net.setInput(blob)
+                outs = net.forward(output_layers)
+
+                class_ids = []
+                confidences = []
+                boxes = []
+                for out in outs:
+                    for detection in out:
+                        scores = detection[5:]
+                        class_id = np.argmax(scores)
+                        confidence = scores[class_id]
+
+                        if confidence > 0.5:
+                            center_x = int(detection[0] * width)
+                            center_y = int(detection[1] * height)
+                            w = int(detection[2] * width)
+                            h = int(detection[3] * height)
+
+                            x = int(center_x - w / 2)
+                            y = int(center_y - h / 2)
+                            boxes.append([x, y, w, h])
+                            confidences.append(float(confidence))
+                            class_ids.append(class_id)
+
+                class_in = []
+                box = []
+
+                indexes = cv2.dnn.NMSBoxes(boxes, confidences, 0.1, 0.4)
+
+                font = cv2.FONT_HERSHEY_PLAIN
+                for i in range(len(boxes)):
+                    if i in indexes:
+                        x, y, w, h = boxes[i]
+                        label = str(classes[class_ids[i]])
+                        print(f"class_ids: {class_ids} {label} x : {x} y : {y}")
+                        color = colors[i]
+                        cv2.rectangle(img, (x, y), (x + w, y + h), color, 2)
+                        cv2.putText(img, label, (x, y+30), font, 2, color, 2)
+                        # meal -> 아니면 점수 +-
+                        if label in meal_con:
+                            meal_check = meal_check + 1
+                        elif label in media_con:
+                            score_con = score_con - 1 
+                        elif label in work_con:
+                            score_con = score_con + 1
+                        else:
+                            print("no detect object")
                 print("sit")                
-                                
+            
+                # meal -> 아니면 점수 체크해서 work or media
+                if meal_check > 1:
+                    stage["CurrentMoment"] = "meal"
+                    print("meal")
+
+                elif score_con > 0:
+                    stage["CurrentMoment"] = "work"
+                    print("work")
+                elif score_con < 0:
+                    stage["CurrentMoment"] = "media"
+                    print("media")
+                else:
+                    print("Try again")
+
+
+            #동작2 lie -> sleep
             elif stage["CurrentMoment"] == "lie":
                 stage["CurrentMoment"] == "sleep"
                 print("lie")
                 
+
+            #동작3 stand -> 전 상태 유지    
             else:
                 print("stand")
 
@@ -197,7 +298,9 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server_socket:
             
             
             
-                        #사진 삭제
+            #스코어 초기화 및 사진 삭제 
+            meal_check = 0
+            score_con = 0
             os.remove("temp.png")  
 
                     
