@@ -1,33 +1,18 @@
 {
-  "title": "LightMe",
-  "config": {
-    "abort": {
-      "single_instance_allowed": "[%key:common::config_flow::abort::single_instance_allowed%]",
-      "no_devices_found": "[%key:common::config_flow::abort::no_devices_found%]"
-    },
-    "step": {
-      "confirm": {
-        "description": "[%key:common::config_flow::description::confirm_setup%]"
-      },
-      "user": {
-        "title": "Set up LightMe",
-        "description": "Do you want to set up LightMe?",
-        "data": {
-          "host": "Host : IP address of your sensor.",
-          "port": "Port : Port number of your sensor."
-        }
-      }
-    }
-  },
-  "options": {
-    "step": {
-      "init": {
-        "title": "LightMe Options.",
-        "data": {
-          "host": "Address : IP address of your sensor.",
-          "port": "Port : Port number of your sensor."
-        }
-      }
-    }
-  }
+	"title": "LightMe Moment Sensor",
+	"config": {
+		"step": {
+			"user": {
+				"title": "Set up LightMe Moment Sensor",
+				"data": {
+                    "host": "IP address of your moment sensor.",
+                    "port": "Port number of your moment sensor. Default value is 8080."
+                }
+			}
+		},
+		"abort": {
+			"cannot_connect": "[%key:common::config_flow::error::cannot_connect%]",
+			"already_configured": "[%key:common::config_flow::abort::already_configured_service%]"
+		}
+	}
 }

@@ -1,12 +1,11 @@
 {
   "domain": "lightme",
-  "name": "Light Me",
+  "name": "LightMe",
   "config_flow": true,
+  "documentation": "https://github.com/StanSign/Capstone-Zigbee",
   "requirements": [],
   "dependencies": [],
-  "codeowners": [
-    "@StanSign"
-  ],
-  "version": "0.1.0",
+  "codeowners": ["@stansign"],
+  "version": "0.0.1",
   "iot_class": "local_polling"
 }

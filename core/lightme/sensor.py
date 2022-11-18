@@ -1,57 +1,92 @@
-"""LightMe moment sensor."""
+"""lightme integration sensor platform."""
 from __future__ import annotations
 
-import logging
-from typing import Any
-from time import sleep
+from homeassistant.core import HomeAssistant
+from homeassistant.config_entries import ConfigEntry
+from homeassistant.components.sensor import SensorEntity, SensorEntityDescription
+from homeassistant.helpers.update_coordinator import CoordinatorEntity
+from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.entity import DeviceInfo
+from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
+from homeassistant.helpers.typing import StateType
 
-from homeassistant.components.sensor import SensorEntity
+from . import get_coordinator
+from .const import (
+    CONF_HOST,
+    CONF_PORT,
+    BRAND,
+    DOMAIN,
+    MODEL,
+    SW_VERSION,
+    SENSOR_INFO
+)
 
-from .lightme_device import LightMeDevice
-from .const import DOMAIN, CONF_API, MOMENT_INFO
+SENSOR_TYPES: tuple[SensorEntityDescription, ...] = (
+    SensorEntityDescription(
+        key="PreviousMoment",
+        icon="mdi:ray-vertex",
+        name="이전 상황"
+    ),
+    SensorEntityDescription(
+        key="CurrentMoment",
+        icon="mdi:ray-vertex",
+        name="현재 상황"
+    )
+)
 
-_LOGGER = logging.getLogger(__name__)
+async def async_setup_entry(
+    hass: HomeAssistant,
+    config_entry: ConfigEntry,
+    async_add_entities: AddEntitiesCallback
+) -> None:
+    """Set up the lightme integration sensor platform from a config_entry."""
+    coordinator = await get_coordinator(hass, config_entry)
 
-async def async_setup_entry(hass, config_entry, async_add_entities):
-    """Set up sensor for LightMe."""
+    sensors = [
+        MomentSensor(coordinator, config_entry, description) for description in SENSOR_TYPES
+    ]
 
-    api = hass.data[DOMAIN][CONF_API][config_entry.entry_id]
+    async_add_entities(sensors)
 
-    def async_add_entity():
-        """Add sensor from sensor."""
-        entities = []
-        for device in MOMENT_INFO.values():
-            entities.append(MomentSensor(device, api))
-        if entities:
-            async_add_entities(entities)
+class MomentSensor(CoordinatorEntity, SensorEntity) :
+    """Sensor platform class."""
 
-    async_add_entity()
+    def __init__(
+        self,
+        coordinator: DataUpdateCoordinator,
+        config_entry: ConfigEntry,
+        description: SensorEntityDescription
+    ):
+        """Initializer."""
+        super().__init__(coordinator)
+        self.description = description
+        self.host = config_entry.data.get(CONF_HOST)
+        self.port = config_entry.data.get(CONF_PORT)
 
-class MomentSensor(LightMeDevice, SensorEntity):
-    """Representation of a moment sensor."""
+        self._attr_unique_id = f"{self.host}-{self.description.key}"
 
     @property
-    def state(self) -> Any:
-        """Return state of moment sensor."""
-
-        # TODO Socket
-        self.api.update()
-        value = self.api.result.get(self.device[0])
-        _LOGGER.warn(f"Value of {self.device[0]}: {value}")
-        return value
-
-    @property
-    def name(self) -> str | None:
-        """Return name of moment sensor."""
-        print(self.device)
-        if not self.api.get_data(self.unique_id):
-            self.api.set_data(self.unique_id, True)
-            return DOMAIN + " " + self.device[0]
-        else:
-            return self.device[1]
+    def device_info(self) -> DeviceInfo:
+        """Return device_info."""
+        return DeviceInfo(
+            identifiers={(DOMAIN, self.host)},
+            manufacturer=BRAND,
+            model=MODEL,
+            name=self.description.name,
+            sw_version=SW_VERSION,
+            via_device=(DOMAIN, self.host)
+        )
 
     @property
     def icon(self) -> str | None:
-        """Return the icon of the sensor."""
-        icon = MOMENT_INFO.get(self.device[0])[3]
-        return icon
+        """Return icon of sensor."""
+        return self.description.icon
+
+    @property
+    def name(self) -> str | None:
+        """Return name of sensor."""
+        return self.description.name
+
+    @property
+    def state(self) -> StateType:
+        return "null"
