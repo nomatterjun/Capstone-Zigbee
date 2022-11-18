@@ -10,6 +10,7 @@ import mediapipe as mp
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
+
 mp_drawing = mp.solutions.drawing_utils
 mp_pose = mp.solutions.pose
 
@@ -30,10 +31,10 @@ classes = ["person", "bicycle", "car", "motorcycle",
 len(classes)
 
 #상황별 필요 객체 목록
-meal_con = ["bottle", "wine glass", "cup", "fork", "knife",
+meal_con = ["bottle", "wine glass", "fork", "knife",
             "spoon", "bowl", "banana", "apple", "sandwich", "orange", "broccoli", "carrot", "hot dog",
             "pizza", "donut", "cake"]
-media_con = ["remote","cell phone","tv","cell phone","couch","bed"]
+media_con = ["remote","tv", "cup","cell phone","couch","bed"]
 work_con = ["book","keyboard", "laptop"]
 
 #결과 송출 부분
@@ -172,7 +173,7 @@ while temp.isOpened():
 
     
         # 동작1 sit
-        if motion == "stand":
+        if motion == "sit":
                     #img load
             img = cv2.imread("temp.png")
             #img = cv2.resize(img, None, fx=0.4, fy=0.4)
@@ -213,35 +214,34 @@ while temp.isOpened():
                 if i in indexes:
                     x, y, w, h = boxes[i]
                     label = str(classes[class_ids[i]])
-                    print(f"class_ids: {class_ids} {label} x : {x} y : {y}")
+                    print(f"class_ids: {label} x : {x} y : {y}")
                     color = colors[i]
                     cv2.rectangle(img, (x, y), (x + w, y + h), color, 2)
                     cv2.putText(img, label, (x, y+30), font, 2, color, 2)
-                     # meal -> 아니면 점수 +-
+                    
+                    # meal -> 아니면 점수 +-
                     if label in meal_con:
                         meal_check = meal_check + 1
                     elif label in media_con:
-                        score_con = score_con - 1 
+                        score_con = score_con - 1
                     elif label in work_con:
                         score_con = score_con + 1
-                    else:
-                        print("no detect object")
             print("sit")
 
            
 
                 
             # meal -> 아니면 점수 체크해서 work or media
-            if meal_check > 1:
+            if meal_check > 0:
                 stage["CurrentMoment"] = "meal"
-                print("meal")
+                print(f"con : meal   mealcheck : {meal_check}  score : {score_con}")
 
             elif score_con > 0:
                 stage["CurrentMoment"] = "work"
-                print("work")
-            elif score_con < 0:
+                print(f"work mealcheck : {meal_check}  score : {score_con} ")
+            elif score_con <= 0:
                 stage["CurrentMoment"] = "media"
-                print("media")
+                print(f"media mealcheck : {meal_check}  score : {score_con}")
             else:
                 print("Try again")
 
@@ -252,7 +252,7 @@ while temp.isOpened():
 
         #동작2 lie -> sleep
         elif motion == "lie":
-            stage["CurrentMoment"] == "sleep"
+            stage["CurrentMoment"] = "sleep"
             print("lie")
             
 
@@ -275,8 +275,11 @@ while temp.isOpened():
 
         #사진 삭제
         os.remove("temp.png")
-            
+
+    meal_check = 0
+    score_con = 0       
     print(stage['CurrentMoment'])
+    stage["CurrentMoment"] = "Initial"
             
 
     time.sleep(0.5)
