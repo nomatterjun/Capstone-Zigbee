@@ -251,7 +251,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server_socket:
                 print("sit")                
             
                 # meal -> 아니면 점수 체크해서 work or media
-                if meal_check > 1:
+                if meal_check > 0:
                     stage["CurrentMoment"] = "meal"
                     print("meal")
 
