@@ -29,6 +29,16 @@ classes = ["person", "bicycle", "car", "motorcycle",
 
 len(classes)
 
+#상황별 필요 객체 목록
+meal_con = ["bottle", "wine glass", "cup", "fork", "knife",
+            "spoon", "bowl", "banana", "apple", "sandwich", "orange", "broccoli", "carrot", "hot dog",
+            "pizza", "donut", "cake"]
+media_con = ["remote","cell phone","tv","cell phone","couch","bed"]
+work_con = ["book","keyboard", "laptop"]
+
+#결과 송출 부분
+meal_check = 0
+score_con = 0
 # Yolo load
 net = cv2.dnn.readNet("yolov3.weights", "yolov3.cfg")
 
@@ -71,20 +81,25 @@ def calculate_Y_diff(a, b):
 
 
 #비디오 설정
-stage = { "result" : str }
+stage = {
+    "CurrentMoment" : "test currnet",
+    "UpcomingMoment": "test upcoming"
+}
 temp = cv2.VideoCapture(0) #카메라
-
-stage['result'] = "Initial stage"
-print(dict['result'])
+stage['CurrentMoment'] = "Initial"
 result = json.dumps(stage)
+motion = "initial"
 
+
+
+NOW = []
 
 
 
 
 
 # 루프 진입
-while temp.isOpened():
+while temp.isOpened():    
     
     #setup mp
     with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as pose:          
@@ -131,86 +146,172 @@ while temp.isOpened():
             
             
             if calculate_Y_diff_abs(right_shoulder, right_hip)<0.05 or calculate_Y_diff_abs(left_shoulder, left_hip)<0.05:
-                stage['result'] = "lie"
+                motion = "lie"
             else:
                     
                 if (right_angle>140 and (left_angle>70 and left_angle<=140)) or (left_angle>140 and (right_angle>70 and right_angle<=140)): 
-                    stage['result'] = "sit"
+                    motion = "sit"
                     
                 elif (right_angle>140 and left_angle<75) or (left_angle>140 and right_angle<75): 
-                    stage['result'] = "sit"
+                    motion = "sit"
                     
                 elif ((right_angle>70 and right_angle<=140)and(left_angle<=75)) or ((left_angle>70 and left_angle<=140)and(right_angle<=75)): 
-                    stage['result'] = "sit"
+                    motion = "sit"
                                 
                 elif (right_angle>70 and right_angle<=140) and (left_angle>70 and left_angle<=140): 
                     if calculate_Y_diff(right_knee, right_hip)<=0.1:
-                        stage['result'] = "sit"
+                        motion = "sit"
                     else:
-                        stage['result'] = "stand"
+                        motion = "stand"
                         
                 elif right_angle>140 and left_angle>140:
-                    stage['result'] = "stand"
+                    motion = "stand"
                     
                 elif right_angle<=100 and left_angle<=100: 
                     if calculate_Y_diff(right_knee, right_hip)<=0.1 or calculate_Y_diff(left_knee, left_hip)<=0.1:
-                        stage['result'] = "sit"              
+                        motion = "sit"              
         except:
             pass
-        
-        #img load
-        img = cv2.imread("temp.png")
-        #img = cv2.resize(img, None, fx=0.4, fy=0.4)
-        height, width, channels = img.shape
-
-        blob = cv2.dnn.blobFromImage(img, 0.00392, (416, 416), (0, 0, 0), True, crop=False)
-        net.setInput(blob)
-        outs = net.forward(output_layers)
-
-        class_ids = []
-        confidences = []
-        boxes = []
-        for out in outs:
-            for detection in out:
-                scores = detection[5:]
-                class_id = np.argmax(scores)
-                confidence = scores[class_id]
-
-                if confidence > 0.5:
-                    center_x = int(detection[0] * width)
-                    center_y = int(detection[1] * height)
-                    w = int(detection[2] * width)
-                    h = int(detection[3] * height)
-
-                    x = int(center_x - w / 2)
-                    y = int(center_y - h / 2)
-                    boxes.append([x, y, w, h])
-                    confidences.append(float(confidence))
-                    class_ids.append(class_id)
 
 
-        class_in = []
-        box = []
+    
+    
+    
+    
+        # 동작1 sit
+        if motion == "stand": #마지막에 sit으로 바꾸자
+                    #img load
+            img = cv2.imread("temp.png")
+            #img = cv2.resize(img, None, fx=0.4, fy=0.4)
+            height, width, channels = img.shape
 
-        indexes = cv2.dnn.NMSBoxes(boxes, confidences, 0.1, 0.4)
+            blob = cv2.dnn.blobFromImage(img, 0.00392, (416, 416), (0, 0, 0), True, crop=False)
+            net.setInput(blob)
+            outs = net.forward(output_layers)
 
-        font = cv2.FONT_HERSHEY_PLAIN
-        for i in range(len(boxes)):
-            if i in indexes:
-                x, y, w, h = boxes[i]
-                label = str(classes[class_ids[i]])
-                print(f"class_ids: {label} x : {x} y : {y}")
-                color = colors[i]
-                cv2.rectangle(img, (x, y), (x + w, y + h), color, 2)
-                cv2.putText(img, label, (x, y+30), font, 2, color, 2)
+            class_ids = []
+            confidences = []
+            boxes = []
+            for out in outs:
+                for detection in out:
+                    scores = detection[5:]
+                    class_id = np.argmax(scores)
+                    confidence = scores[class_id]
+
+                    if confidence > 0.5:
+                        center_x = int(detection[0] * width)
+                        center_y = int(detection[1] * height)
+                        w = int(detection[2] * width)
+                        h = int(detection[3] * height)
+
+                        x = int(center_x - w / 2)
+                        y = int(center_y - h / 2)
+                        boxes.append([x, y, w, h])
+                        confidences.append(float(confidence))
+                        class_ids.append(class_id)
+
+            class_in = []
+            box = []
+
+            indexes = cv2.dnn.NMSBoxes(boxes, confidences, 0.1, 0.4)
+
+            font = cv2.FONT_HERSHEY_PLAIN
+            for i in range(len(boxes)):
+                if i in indexes:
+                    x, y, w, h = boxes[i]
+                    label = str(classes[class_ids[i]])
+                    print(f"class_ids: {label} x : {x} y : {y}")
+                    color = colors[i]
+                    cv2.rectangle(img, (x, y), (x + w, y + h), color, 2)
+                    cv2.putText(img, label, (x, y+30), font, 2, color, 2)
+                     # meal -> 아니면 점수 +-
+
+
+                    if label in meal_con:
+                        meal_check = meal_check + 1
+                        
+                    elif label in media_con:
+                        score_con = score_con - 1 
+                        
+                    elif label in work_con:
+                        score_con = score_con + 1
+     
+            # meal
+            if meal_check > 0:
+                NOW.insert(0, "meal")
+                            
+            else :
+                
+                if score_con > 0:
+                    NOW.insert(0, "work")
+                    
+                elif score_con < 0:
+                    NOW.insert(0, "media")
+                    
+                else:
+                    print( "Try again => " + stage["CurrentMoment"] )
+                                   
+
+        #동작2 lie -> sleep
+        elif motion == "lie":
+            NOW.insert(0, "sleep")
+
+
+        #동작3 stand -> 전 상태 유지
+        else:
+            print("stand => " + stage["CurrentMoment"])
+
+            
 
         #사진 삭제
         os.remove("temp.png")
+ 
+    
+    
+    
+
+
+
+ 
+                
+    if(len(NOW) > 3):
+        print("pop")
+        NOW.pop()
+        
+    print(NOW)
+    
+    
+    
+        
+        
+    
+    if(NOW.count("work")  == 3):
+        stage["CurrentMoment"] = "work"
+        
+    elif(NOW.count("media")  == 3):
+        stage["CurrentMoment"] = "media"
+        
+    elif(NOW.count("meal")  == 3):
+        stage["CurrentMoment"] = "meal"
+        
+    elif(NOW.count("sleep")  == 3):
+        stage["CurrentMoment"] = "sleep"
+        
+        
+        
+        
+        
+    print(stage["CurrentMoment"])
+
+    
+    meal_check = 0
+    score_con = 0
+    stage["CurrentMoment"] = "initial"        
             
-    print(stage['result'])
+    
             
 
-    time.sleep(0.5)
+    time.sleep(1)
     
 #client_socket.close()  # 클라이언트 소켓 종료
     
