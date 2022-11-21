@@ -1,6 +1,8 @@
 """lightme integration sensor platform."""
 from __future__ import annotations
 
+import logging
+
 from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.components.sensor import SensorEntity, SensorEntityDescription
@@ -20,16 +22,18 @@ from .const import (
     SW_VERSION
 )
 
+_LOGGER = logging.getLogger(__name__)
+
 SENSOR_TYPES: tuple[SensorEntityDescription, ...] = (
-    SensorEntityDescription(
-        key="PreviousMoment",
-        icon="mdi:ray-start",
-        name="이전 상황"
-    ),
     SensorEntityDescription(
         key="CurrentMoment",
         icon="mdi:ray-vertex",
         name="현재 상황"
+    ),
+    SensorEntityDescription(
+        key="PreviousMoment",
+        icon="mdi:ray-start",
+        name="이전 상황"
     )
 )
 
@@ -53,7 +57,7 @@ class MomentSensor(CoordinatorEntity, SensorEntity) :
 
     def __init__(
         self,
-        coordinator,
+        coordinator: DataUpdateCoordinator,
         config_entry: ConfigEntry,
         description: SensorEntityDescription
     ):
@@ -82,4 +86,4 @@ class MomentSensor(CoordinatorEntity, SensorEntity) :
     @property
     def state(self) -> StateType:
         """Return the state of the sensor."""
-        return self.coordinator.data[self.description.key]
+        return self.coordinator.data.get(self.description.key) #[self.description.key]

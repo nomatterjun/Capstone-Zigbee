@@ -3,15 +3,15 @@ from __future__ import annotations
 
 import async_timeout
 import logging
-import socket
 import json
+import asyncio
 
 from datetime import timedelta
 from typing import Any
 
 from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry, ConfigType
-from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
+from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 from .const import (
     DOMAIN,
@@ -22,7 +22,7 @@ from .const import (
 
 SIZE = 1024
 UPDATE_INTERVAL = 3
-TIMEOUT_INTERVAL = 30
+TIMEOUT_INTERVAL = 10
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -65,30 +65,39 @@ async def get_coordinator(
     if hass.data[DOMAIN].get(host):
         return hass.data[DOMAIN][host]
 
-    async def async_get_data():
-        with async_timeout.timeout(TIMEOUT_INTERVAL):
-            data: dict[str: Any] = []
-            try:
-                server_address = (host, port)
+    async def run_client(host: str, port: int):
+        # 서버와의 연결을 생성합니다.
+        reader: asyncio.StreamReader
+        writer: asyncio.StreamWriter
+        reader, writer = await asyncio.open_connection(host, port)
 
-                with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:
-                    client_socket.settimeout(TIMEOUT_INTERVAL)
-                    msg: str | bytes | None
-                    try:
-                        client_socket.connect(server_address)  # 서버에 접속
-                        client_socket.send("Requesting state of sensor.".encode())  # 서버에 메시지 전송
-                        msg = client_socket.recv(SIZE)  # 서버로부터 응답받은 메시지 반환
-                        _LOGGER.info("response from server : %s", format(msg))  # 서버로부터 응답받은 메시지 출력
-                    except socket.timeout as err:
-                        _LOGGER.error("Timeout while requesting socket connection, %s", err)
-                    finally:
-                        client_socket.close()
-                    if msg is not None:
-                        data = json.loads(msg)
-            except Exception as exc:
-                _LOGGER.error("Failed to receive data from socket Error: %s", exc)
-                raise
-            return data
+        # show connection info
+        print("[C] connected")
+
+        # 루프를 돌면서 입력받은 내용을 서버로 보내고,
+        # 응답을 받으면 출력합니다.
+        line = ("Capstone gogo")
+
+        # 입력받은 내용을 서버로 전송
+        payload = line.encode()
+        writer.write(payload)
+        await writer.drain()
+        print(f"[C] sent: {len(payload)} bytes.\n")
+
+        # 서버로부터 받은 응답을 표시
+        data = await reader.read(1024)  # type: bytes
+        print(f"[C] received: {len(data)} bytes")
+        print(f"[C] message: {data.decode()}")
+        if data is not None:
+            result = json.loads(data)
+            return result
+
+    async def async_get_data():
+        try:
+            async with async_timeout.timeout(TIMEOUT_INTERVAL):
+                return await run_client(host, port)
+        except Exception as exc:
+            raise UpdateFailed(f"LightMe error: {exc}") from exc
 
     # hass.data{
     #   "lightme": {
