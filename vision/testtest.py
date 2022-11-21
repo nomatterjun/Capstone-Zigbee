@@ -10,7 +10,6 @@ import mediapipe as mp
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
-
 mp_drawing = mp.solutions.drawing_utils
 mp_pose = mp.solutions.pose
 
@@ -31,10 +30,10 @@ classes = ["person", "bicycle", "car", "motorcycle",
 len(classes)
 
 #상황별 필요 객체 목록
-meal_con = ["bottle", "wine glass", "fork", "knife",
+meal_con = ["bottle", "wine glass", "cup", "fork", "knife",
             "spoon", "bowl", "banana", "apple", "sandwich", "orange", "broccoli", "carrot", "hot dog",
             "pizza", "donut", "cake"]
-media_con = ["remote","tv", "cup","cell phone","couch","bed"]
+media_con = ["remote","cell phone","tv","cell phone","couch","bed"]
 work_con = ["book","keyboard", "laptop"]
 
 #결과 송출 부분
@@ -93,10 +92,14 @@ motion = "initial"
 
 
 
+NOW = []
+
+
+
 
 
 # 루프 진입
-while temp.isOpened():
+while temp.isOpened():    
     
     #setup mp
     with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as pose:          
@@ -172,8 +175,11 @@ while temp.isOpened():
 
 
     
+    
+    
+    
         # 동작1 sit
-        if motion == "sit":
+        if motion == "stand": #마지막에 sit으로 바꾸자
                     #img load
             img = cv2.imread("temp.png")
             #img = cv2.resize(img, None, fx=0.4, fy=0.4)
@@ -218,71 +224,94 @@ while temp.isOpened():
                     color = colors[i]
                     cv2.rectangle(img, (x, y), (x + w, y + h), color, 2)
                     cv2.putText(img, label, (x, y+30), font, 2, color, 2)
-                    
-                    # meal -> 아니면 점수 +-
+                     # meal -> 아니면 점수 +-
+
+
                     if label in meal_con:
                         meal_check = meal_check + 1
+                        
                     elif label in media_con:
-                        score_con = score_con - 1
+                        score_con = score_con - 1 
+                        
                     elif label in work_con:
                         score_con = score_con + 1
-            print("sit")
-
-           
-
-                
-            # meal -> 아니면 점수 체크해서 work or media
+     
+            # meal
             if meal_check > 0:
-                stage["CurrentMoment"] = "meal"
-                print(f"con : meal   mealcheck : {meal_check}  score : {score_con}")
-
-            elif score_con > 0:
-                stage["CurrentMoment"] = "work"
-                print(f"work mealcheck : {meal_check}  score : {score_con} ")
-            elif score_con <= 0:
-                stage["CurrentMoment"] = "media"
-                print(f"media mealcheck : {meal_check}  score : {score_con}")
-            else:
-                print("Try again")
-
-
-
-
-
+                NOW.insert(0, "meal")
+                            
+            else :
+                
+                if score_con > 0:
+                    NOW.insert(0, "work")
+                    
+                elif score_con < 0:
+                    NOW.insert(0, "media")
+                    
+                else:
+                    print( "Try again => " + stage["CurrentMoment"] )
+                                   
 
         #동작2 lie -> sleep
         elif motion == "lie":
-            stage["CurrentMoment"] = "sleep"
-            print("lie")
-            
-
-
-
-
-
+            NOW.insert(0, "sleep")
 
 
         #동작3 stand -> 전 상태 유지
         else:
-            print("stand")
+            print("stand => " + stage["CurrentMoment"])
 
             
-
-
-
-
-
 
         #사진 삭제
         os.remove("temp.png")
+ 
+    
+    
+    
 
+
+
+ 
+                
+    if(len(NOW) > 3):
+        print("pop")
+        NOW.pop()
+        
+    print(NOW)
+    
+    
+    
+        
+        
+    
+    if(NOW.count("work")  == 3):
+        stage["CurrentMoment"] = "work"
+        
+    elif(NOW.count("media")  == 3):
+        stage["CurrentMoment"] = "media"
+        
+    elif(NOW.count("meal")  == 3):
+        stage["CurrentMoment"] = "meal"
+        
+    elif(NOW.count("sleep")  == 3):
+        stage["CurrentMoment"] = "sleep"
+        
+        
+        
+        
+        
+    print(stage["CurrentMoment"])
+
+    
     meal_check = 0
-    score_con = 0       
-    print(stage['CurrentMoment'])
-    stage["CurrentMoment"] = "Initial"
+    score_con = 0
+    stage["CurrentMoment"] = "initial"        
+            
+    
             
 
-    time.sleep(0.5)
+    time.sleep(1)
     
 #client_socket.close()  # 클라이언트 소켓 종료
     
