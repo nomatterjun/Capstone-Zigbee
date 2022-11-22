@@ -18,8 +18,26 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_marginBottom="30dp"
+        android:layout_marginBottom="20dp"
         android:text="send"
         android:textSize="20sp" />
+
+
+    <org.eazegraph.lib.charts.BarChart
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/barchart"
+        android:layout_width="match_parent"
+        android:layout_height="256dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="400dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginBottom="20dp"
+        android:padding="10dp"
+        app:egBarWidth="20dp"
+        app:egEnableScroll="true"
+        app:egFixedBarWidth="true"
+        app:egLegendHeight="40dp"
+        app:egShowDecimal="true" />
+
 
 </RelativeLayout>

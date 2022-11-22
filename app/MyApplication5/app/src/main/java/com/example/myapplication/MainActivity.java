@@ -1,6 +1,7 @@
 package com.example.myapplication;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -17,30 +18,36 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.Volley;
 
+import org.eazegraph.lib.charts.BarChart;
+import org.eazegraph.lib.models.BarModel;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 public class MainActivity extends AppCompatActivity  {
-    TextView textView;
+    BarChart barChart;
     Button button;
     RecyclerView recyclerView;
     RecyclerAdapter adapter = new RecyclerAdapter();
     ArrayList<Data> list = new ArrayList<>();
+    ArrayList<String> state_cnt = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        barChart = (BarChart) findViewById(R.id.barchart);
         button = (Button) findViewById(R.id.send_btn);
         recyclerView = findViewById(R.id.recyclerview);
         //RecyclerView
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+
         recyclerView.setLayoutManager(linearLayoutManager);
         //RecyclerView에 어댑터 적용
         recyclerView.setAdapter(adapter);
@@ -56,7 +63,11 @@ public class MainActivity extends AppCompatActivity  {
             AppHelper.requestQueue = Volley.newRequestQueue(getApplicationContext());
         } //RequestQueue 생성
 
-    }
+
+        }
+
+
+
 
     public void sendRequest() {
 //        String url = "http://10.93.84.21:8123/api/history/period?filter_entity_id=sun.sun";
@@ -81,13 +92,38 @@ public class MainActivity extends AppCompatActivity  {
                                             object.getString("last_changed"),
                                             object.getString("last_updated") ));
 
+//                                    String get_status = object.getString("status");
+
+                                    // 각 상태 횟수 구하기
+                                    state_cnt.add(object.getString("state"));
+
                                 }
                             }
 
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
+
+                        // 리사이클러 뷰 어댑터 적용
                         adapter.setattList(list);
+
+                        // 그래프 y축 값 구하기
+                        int Meal_cnt = Collections.frequency(state_cnt,"Meal");
+                        int Work_cnt = Collections.frequency(state_cnt,"Work");
+                        int Media_cnt = Collections.frequency(state_cnt,"Media");
+                        int Sleep_cnt = Collections.frequency(state_cnt,"Sleep");
+
+                        // 그래프 출력
+                        barChart.clearChart();
+
+                        barChart.addBar(new BarModel("Meal",Meal_cnt, 0xFF56B7F1));
+                        barChart.addBar(new BarModel("Work", Work_cnt, 0xFF56B7F1));
+                        barChart.addBar(new BarModel("Media", Media_cnt, 0xFF56B7F1));
+                        barChart.addBar(new BarModel("Sleep", Sleep_cnt, 0xFF56B7F1));
+
+                        barChart.startAnimation();
+
+
                     }
                 }, new Response.ErrorListener() {
             @Override
@@ -96,6 +132,7 @@ public class MainActivity extends AppCompatActivity  {
                 error.printStackTrace();
             }
         })
+
         {
 //            @Override
 //            protected Map<String, String> getParams() throws AuthFailureError {
@@ -112,12 +149,21 @@ public class MainActivity extends AppCompatActivity  {
 //            }
         };
 
+
+
+
+
         jsonArrayRequest.setShouldCache(false); //이전 결과 있어도 새로 요청하여 응답을 보여준다.
         AppHelper.requestQueue = Volley.newRequestQueue(this); // requestQueue 초기화 필수
         AppHelper.requestQueue.add(jsonArrayRequest);
 
 //        println("요청 보냄.");
     }
+
+
+
+
+
 
 //    public void println(String data) {
 //        textView.setText(data +"\n");
