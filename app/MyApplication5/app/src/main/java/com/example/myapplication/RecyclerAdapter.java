@@ -27,17 +27,17 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
             super(itemView);
 
             state_list = itemView.findViewById(R.id.state_list);
-            id_list = itemView.findViewById(R.id.id_list);
-            changed_list = itemView.findViewById(R.id.changed_list);
-            updated_list = itemView.findViewById(R.id.updated_list);
+//            id_list = itemView.findViewById(R.id.id_list);
+//            changed_list = itemView.findViewById(R.id.changed_list);
+//            updated_list = itemView.findViewById(R.id.updated_list);
 
         }
 
         void onBind(Data data1) {
             state_list.setText(data1.getState());
-            id_list.setText(data1.getEntity_id());
-            changed_list.setText(data1.getLast_changed());
-            updated_list.setText(data1.getLast_updated());
+//            id_list.setText(data1.getEntity_id());
+//            changed_list.setText(data1.getLast_changed());
+//            updated_list.setText(data1.getLast_updated());
         }
     }
 

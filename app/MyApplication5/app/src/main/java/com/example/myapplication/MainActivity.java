@@ -45,8 +45,9 @@ public class MainActivity extends AppCompatActivity  {
         barChart = (BarChart) findViewById(R.id.barchart);
         button = (Button) findViewById(R.id.send_btn);
         recyclerView = findViewById(R.id.recyclerview);
+
         //RecyclerView
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this,RecyclerView.HORIZONTAL, false);
 
         recyclerView.setLayoutManager(linearLayoutManager);
         //RecyclerView에 어댑터 적용
@@ -86,11 +87,10 @@ public class MainActivity extends AppCompatActivity  {
                                 JSONArray internal_array = response.getJSONArray(i);
                                 for(int k=0; k < internal_array.length(); k++) {
                                     JSONObject object = internal_array.getJSONObject(k);
-                                    list.add(new Data(
-                                            object.getString("entity_id"),
-                                            object.getString("state"),
-                                            object.getString("last_changed"),
-                                            object.getString("last_updated") ));
+                                    list.add(new Data( object.getString("state") ));
+//                                            object.getString("entity_id"),
+//                                            object.getString("last_changed"),
+//                                            object.getString("last_updated") ));
 
 //                                    String get_status = object.getString("status");
 
